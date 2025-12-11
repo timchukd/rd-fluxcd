@@ -1,1 +1,0 @@
-# rd-fluxcd-lesson

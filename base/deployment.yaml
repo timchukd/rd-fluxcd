@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: course-app
+  labels:
+    app: course-app
+    version: "1.0"
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: course-app
+  template:
+    metadata:
+      labels:
+        app: course-app
+        version: "1.0"
+    spec:
+      containers:
+        - name: course-app
+          image: dmitrytimchuk/course-app:latest
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          env:
+            - name: APP_NAME
+              value: "Course App"
+            - name: APP_VERSION
+              value: "1.0"
+            - name: APP_ENVIRONMENT
+              value: "development"
+            - name: REDIS_HOST
+              value: "dragonfly"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: STORE
+              value: "dragonfly"
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8080
+            periodSeconds: 5
+            initialDelaySeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8080
+            periodSeconds: 5
+            initialDelaySeconds: 10
+            timeoutSeconds: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
